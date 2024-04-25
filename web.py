@@ -4,27 +4,25 @@ import cv2
 import numpy as np
 import torch
 import albumentations as albu
-import matplotlib.pyplot as plt
 from albumentations.pytorch import ToTensorV2
 
-
-# Define the classes and image dimensions
+# Определение классов и размеров изображения
 CLASSES = ["фон", "волосы", "кожа"]
 INFER_WIDTH = 256
 INFER_HEIGHT = 256
 
-# Define the normalization statistics for ImageNet
+# Статистика нормализации для ImageNet
 IMAGENET_MEAN = [0.485, 0.456, 0.406]
 IMAGENET_STD = [0.229, 0.224, 0.225]
 
-# Define the device to use for computations
+# Определение устройства для вычислений
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-# Load the JIT model
+# Загрузка JIT модели
 best_model = torch.jit.load('models/best_model_new.pt', map_location=DEVICE)
 
-# Define the augmentations
 def get_validation_augmentation():
+    """Получить аугментации для валидации."""
     test_transform = [
         albu.LongestMaxSize(max_size=INFER_HEIGHT, always_apply=True),
         albu.PadIfNeeded(min_height=INFER_HEIGHT, min_width=INFER_WIDTH, border_mode=0, always_apply=True),
@@ -32,55 +30,51 @@ def get_validation_augmentation():
     ]
     return albu.Compose(test_transform)
 
-
 def infer_image(image):
-    # Инференс на изображении Unet
+    """Получить маску на изображении с помощью модели Unet."""
     original_height, original_width, _ = image.shape
 
-    # Apply the augmentations
+    # Применение аугментаций
     augmentation = get_validation_augmentation()
     augmented = augmentation(image=image)
     image_transformed = augmented['image']
 
-    # Convert the image to a PyTorch tensor and move it to the device
+    # Преобразование изображения в PyTorch тензор и перемещение на устройство
     x_tensor = torch.from_numpy(image_transformed).to(DEVICE).unsqueeze(0).permute(0, 3, 1, 2).float()
 
-    # Run the image through the model
+    # Прогон изображения через модель
     best_model.eval()
     with torch.no_grad():
         pr_mask = best_model(x_tensor)
 
-    # Convert the output to a numpy array and remove the batch dimension
+    # Преобразование вывода в массив numpy и удаление размерности пакета
     pr_mask = pr_mask.squeeze().cpu().detach().numpy()
 
-    # Get the class with the highest probability for each pixel
+    # Получение класса с наивысшей вероятностью для каждого пикселя
     label_mask = np.argmax(pr_mask, axis=0)
 
-    # Опредяем сколько пикселей появится по бокам от паддингов и далее вырежем их
+    # Определение количества пикселей, которые будут появляться по бокам от паддингов, и их обрезка
     if original_height > original_width:
         delta_pixels = int(((original_height-original_width)/2)/original_height * INFER_HEIGHT)
-        print('delta_pixels', delta_pixels)
         image_cropped = image_transformed[:, delta_pixels + 1: INFER_WIDTH - delta_pixels - 1]
         mask_cropped = label_mask[:, delta_pixels + 1 : INFER_WIDTH - delta_pixels - 1]
     elif original_height < original_width:
         delta_pixels = int(((original_width-original_height)/2)/original_width * INFER_WIDTH)
-        print('delta_pixels', delta_pixels)
         image_cropped = image_transformed[delta_pixels + 1: INFER_HEIGHT - delta_pixels - 1, :]
         mask_cropped = label_mask[delta_pixels + 1: INFER_HEIGHT - delta_pixels - 1, :]
     else:
         mask_cropped = label_mask
         image_cropped = image_transformed
 
-    # Resize the mask back to the original image size
+    # Изменение размера маски обратно к исходному размеру изображения
     label_mask_real_size = cv2.resize(
         mask_cropped, (original_width, original_height), interpolation=cv2.INTER_NEAREST
     )
 
     return label_mask_real_size
 
-
-# Функция для обновления изображения на основе выбранных пользователем значений
 def adjust_hsv(image, mask, h_adjust, s_adjust, v_adjust, index):
+    """Корректировка значения HSV на изображении в области, где mask == index."""
     # Преобразование изображения в HSV
     image_hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV).astype(np.float32)
     h, s, v = cv2.split(image_hsv)
@@ -98,20 +92,18 @@ def adjust_hsv(image, mask, h_adjust, s_adjust, v_adjust, index):
     
     return image_rgb_adjusted
 
-
-# Функция для отображения изображения
 def display_image(image):
+    """Отображение изображения."""
     st.image(image, use_column_width=True)
 
-# Функция для загрузки изображения
 def upload_image(label):
+    """Загрузка изображения."""
     uploaded_file = st.file_uploader(label, type=['jpg', 'png', 'jpeg'])
     if uploaded_file is not None:
         image_data = np.array(Image.open(uploaded_file))
         return image_data
     return None
 
-# Основная функция приложения
 def main():
     st.set_page_config(
         page_title="Обрабочик изображений",
