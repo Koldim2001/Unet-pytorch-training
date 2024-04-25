@@ -1,0 +1,7 @@
+numpy
+pytorch
+opencv-python
+matplotlib
+segmentation_models_pytorch
+albumentations
+streamlit==1.29.0
