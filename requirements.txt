@@ -1,4 +1,3 @@
-numpy
 pytorch
 opencv-python
 matplotlib
