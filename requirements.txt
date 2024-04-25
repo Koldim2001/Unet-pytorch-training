@@ -1,4 +1,4 @@
-pytorch
+torch
 opencv-python
 matplotlib
 segmentation_models_pytorch
