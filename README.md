@@ -4,8 +4,12 @@
 Код написан под формат данных CamVid из CVAT
 
 Код веб-сервиса по изменению цвета волос и кожи, основанный на работе нейронной сети из примера - __web.py__. В примере рассматривается сеть, которая сегментирует кожу и волосы на фотографиях. 
+Cсылка на сайт - [веб-приложение](https://image-editor-unet-pytorch.streamlit.app/)
+
+![Пример работы сайта](models/web_example.gif)
 
 camvid-dataset из видео (трехклассовая сегментация) доступен по этой ссылке - [DATASET](https://drive.google.com/file/d/1Vezw0oGxn8eUMMiH7StNgA1EtYfLev0l/view?usp=sharing)
+
 
 
 ## __УСТАНОВКА:__
@@ -30,19 +34,16 @@ pip install -r requirements.txt
 ---
 
 После этого можно работать с ноубуком обучения.\
-Но если есть желание запустить веб-сайт, то необходимо в терминате запустить эту команду:
+Но если есть желание запустить локально веб-сайт, то необходимо в терминате запустить эту команду:
 ```
 streamlit run web.py
 ```
 
 
-<br/>
-
 ---
 
 ## Webinar/Tutorial
 Имеется подробный туториал по работе с данным репозиторием, в котором рассказаны основные теоретические и практические моменты по обучению моделей семантической сегментации + использования моделей на практике\
-Доступен по клику на иконку:\
-[![webinar video](https://i.ytimg.com/vi/Y9CBkdhGwqI/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAfkTYExZ1EY14PZUplrzdi0FaGLg)](https://www.youtube.com/channel/UCJG413_ZLkiE5f_OMyGv5KQ)
+YouTube видео доступно по [__ССЫЛКЕ__](https://www.youtube.com/channel/UCJG413_ZLkiE5f_OMyGv5KQ)
 
 
