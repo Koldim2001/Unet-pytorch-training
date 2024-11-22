@@ -25,7 +25,7 @@ def get_validation_augmentation():
     """Получить аугментации для валидации."""
     test_transform = [
         albu.LongestMaxSize(max_size=INFER_HEIGHT, always_apply=True),
-        albu.PadIfNeeded(min_height=INFER_HEIGHT, min_width=INFER_WIDTH, border_mode=0, always_apply=True),
+        albu.PadIfNeeded(min_height=INFER_HEIGHT, min_width=INFER_WIDTH, always_apply=True),
         albu.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
     ]
     return albu.Compose(test_transform)
